@@ -1,14 +1,5 @@
 
 
-/*
-  -Added soft trasition to brightness levels
-  -Added option to address "All" lights..
-  -Started work on notifation animation, and alarm animation
-  -payload opions: ON,OFF, int(0-255), ALARM, NOTIFY
-  -Alarm/Notify Animations depend on PIN_NUMBERS and associated PIN_NAMES to be in a clock or counter clockwise sequence.
-  - Alarm Animation assumes ambience pin is last
-*/
-
 /******************  LIBRARY SECTION *************************************/
 #include <SimpleTimer.h>
 #include <WiFi.h>
