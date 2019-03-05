@@ -1,19 +1,23 @@
-# ESP32_Ceiling_Light
+# ESP32_Led_Control_Board
 
-ESP32 based dimmable ceiling light
+An ESP32 based Led control board, for 8 individually dimmable led channels (6-24v).. This project is compatible and extends the functionality of the ESP32_Ceiling_light project from the hookup. 
 
 https://www.youtube.com/watch?v=PVQhGzo-Dtg
 
-I plan to take this a couple steps further..  This Fork is for a hallway light setup.. 9 rows of lights down a hallway..
-After basic assembly and functionality is completed, I plan to integrate an OpenMV Cam M7 to track movement and control the lighting.  
-
-  -Added soft trasition to brightness levels
-  -Added Topic to address "All" lights, with single payload
-  -Started a notifation animation, and alarm animation 
-  -payload opions: ON,OFF, int(0-255), ALARM, NOTIFY
-  -Alarm/Notify Animations depend on PIN_NUMBERS and associated PIN_NAMES to be in a clock or counter clockwise sequence.
-  -Alarm Animation assumes ambience pin is last
-  
--gerber files to order a pcb were added.
--I have recieved my pcb 2018-12-03, and will assemble for testing shortly 
--TODO reminder: add manual switch controls
+This control board is intended to control the lighting of an entire room, using a powersupply and matching leds(6-24v), standard wall switches wired directly to the board (!NO HIGH VOLTAGE!), and supporting MQTT software (like Home Assistant, homebridge, gbridge, openhab ect) 
+    
+Features:
+  - 8 dimmable led channels (6-24v), plus 1 additional non-dimmable channel.
+  - Fades between on / off states and different brightness settings
+  - Switches:  easily add and configure physical switches for individual/group channel control 
+  - Non blocking wifi connection / improved wifi connection recovery 
+  - extended MQTT support: 
+              - compatible with Ceiling_Light format (ON,OFF, int(0-100) commands in single topic)
+              - added topic to control "All" lights simutaniously
+              - added seperate brightness topic for compatiblity with other apps (eg homebridge)
+              - added mqtt topics for gbridge cloud support (for google assistant support)
+  - Supports alarms, notifications and scenes
+  - gerber files for the pcb design, are available (but not required)
+  - pcb supports 3 switches, 8 + 1 led channels, power distrubution, headers for esp32/easy access to all pins on esp32
+ 
+  - Note : I have not tested the power handling limit of the board / components.. do so at own risk  
