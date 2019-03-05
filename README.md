@@ -10,7 +10,7 @@ Features:
   - 8 dimmable led channels (6-24v), plus 1 additional non-dimmable channel.
   - Fades between on / off states and different brightness settings
   - Switches:  easily add and configure physical switches for individual/group channel control 
-  - Non blocking wifi connection.. (Switches fuctions without internet) and improved wifi connection recovery
+  - Non blocking wifi connection.. (the Switches will always work) and improved wifi connection recovery
   - Saves and restores led state on reboot from power failure... without the need of wifi support
   - extended MQTT support: 
               - compatible with Ceiling_Light format (ON,OFF, int(0-100) commands in single topic)
