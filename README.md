@@ -4,7 +4,7 @@ An ESP32 based Led control board, for 8 individually dimmable led channels (6-24
 
 https://www.youtube.com/watch?v=PVQhGzo-Dtg
 
-This control board is intended to control the lighting of an entire room, using a powersupply and matching leds(6-24v), standard wall switches wired directly to the board (!NO HIGH VOLTAGE!), and supporting MQTT software (like Home Assistant, homebridge, gbridge, openhab ect) 
+This control board is intended to control the lighting of an entire room, using a powersupply and matching leds(6-24v), standard wall switches wired directly to the board (!NO HIGH VOLTAGE!), and supporting MQTT software (like Home Assistant, homebridge, gbridge ect) 
     
 Features:
   - 8 dimmable led channels (6-24v), plus 1 additional non-dimmable channel.
