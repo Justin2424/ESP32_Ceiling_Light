@@ -18,7 +18,7 @@ Features:
               - added seperate brightness topic for compatiblity with other apps (eg homebridge)
                 ( and allows changing brightness level when light is off)
               - added mqtt topics for gbridge cloud support (for google assistant support)
-  - Supports alarms, notifications and scenes
+  - Supports alarm, notification, custom scene or animation
   - gerber files for the pcb design (optional)
   - pcb supports 3 switches, 8 + 1 led channels, power distrubution, headers for esp32 / easy access to all pins on esp32
  
