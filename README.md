@@ -19,7 +19,7 @@ Features:
                 ( and allows changing brightness level when light is off)
               - added mqtt topics for gbridge cloud support (for google assistant support)
   - Supports alarms, notifications and scenes
-  - gerber files for the pcb design (but not required)
+  - gerber files for the pcb design (optional)
   - pcb supports 3 switches, 8 + 1 led channels, power distrubution, headers for esp32 / easy access to all pins on esp32
  
   Note : I have not tested the power handling limit of the board / components.. do so at own risk.
