@@ -11,7 +11,7 @@ Features:
   - Fades between on / off states and different brightness settings
   - Switches:  easily add and configure physical switches for individual/group channel control 
   - Non blocking wifi connection.. (Switches fuctions without internet) and improved wifi connection recovery
-  - Saves and restores Led state on reboot from power failure... without the need of wifi support
+  - Saves and restores led state on reboot from power failure... without the need of wifi support
   - extended MQTT support: 
               - compatible with Ceiling_Light format (ON,OFF, int(0-100) commands in single topic)
               - added topic to control "All" lights simutaniously
@@ -22,4 +22,19 @@ Features:
   - gerber files for the pcb design (but not required)
   - pcb supports 3 switches, 8 + 1 led channels, power distrubution, headers for esp32 / easy access to all pins on esp32
  
-  - Note : I have not tested the power handling limit of the board / components.. do so at own risk  
+  Note : I have not tested the power handling limit of the board / components.. do so at own risk.
+  
+  please let me know if you find any bugs, or have suggestions. Contributions to the code would be more than welcomed..
+ Its a project in progress.. I'm interested in adding as many sensors and features as practical into this, or supporting boards.
+  including:
+    - full connection manager (ap for phone browser config / connection)
+    - adding various sensors like temp and humidity sensors/support
+    - presence detection (who's phone is online)
+    and hopefully:
+    - motion detection/tracking (ir array with logic/analsys)
+    perhaps 
+      -a simple mesh network/peer to peer/relay mqtt messages, for clients who are out of the wifi range/ disconnected from the broker 
+     
+  
+  
+  justinmallais@gmail.com
