@@ -1,7 +1,4 @@
 
-
-
-
 #include <WiFi.h>
 #include <WiFiClient.h>
 #include <PubSubClient.h>
@@ -14,13 +11,13 @@
 /**********************************************************************************************************************************/
 /******* USER CONFIGURED SECTION **************************************************************************************************/
 
-static const char* ssid = "aWiFiNetwork";                         // change... use your wifi network name
-static const char* password = "classified";                       // change... use your wifi password
+static const char* ssid = "your_wifi_ssid";                       // change... use your wifi network name
+static const char* password = "your_wifi_password";               // change... use your wifi password
 static const char* mqtt_server = "192.168.0.25";                  // change... ip address  
 static const int mqtt_port = 1883;                                // change... if required
 static const char *mqtt_user = "";                                // change... if required
 static const char *mqtt_pass = "";                                // change... if required
-static const char *mqtt_client_name = "basement/hallway";      // change.. client names must be unique
+static const char *mqtt_client_name = "basement/hallway";         // change.. client names must be unique
 
 // MQTT TOPICS  :  The portion of text "basement/hallway/row?" can be edited to your prefered naming needs
 // these MQTT Topics we will use for individual led control: 
@@ -77,11 +74,11 @@ static const char ALL_BRIGHTNESS[] =                 {"basement/hallway/all/brig
 static const char STATUS_ALL_BRIGHTNESS[] =          {"status/basement/hallway/all/brightness"};  // publish // new
 // gBridge requires its own mqtt format if your using its cloud server.   
 // CHANGE the #'s 1234567 (user_id and device id).. according to what is shown for your device in your gbridge account
-static const char gBridge_ALL_ON[] =                 {"gBridge/u814/d2241/onoff"};                // subsribe 
-static const char gBridge_STATUS_ALL_ON[] =          {"gBridge/u814/d2241/onoff/set"};            // publish 
+static const char gBridge_ALL_ON[] =                 {"gBridge/u123/d4567/onoff"};                // CHANGE the #'s (1234567)  // subsribe 
+static const char gBridge_STATUS_ALL_ON[] =          {"gBridge/u123/d4567/onoff/set"};            // CHANGE the #'s (1234567)  // publish status 
 
-static const char gBridge_ALL_BRIGHTNESS[] =         {"gBridge/u814/d2241/brightness"};           // subsribe
-static const char gBridge_STATUS_ALL_BRIGHTNESS[] =  {"gBridge/u814/d2241/brightness/set"};       // publish
+static const char gBridge_ALL_BRIGHTNESS[] =         {"gBridge/u123/d4567/brightness"};           // subsribe
+static const char gBridge_STATUS_ALL_BRIGHTNESS[] =  {"gBridge/u123/d4567/brightness/set"};       // publish
 // RGBW Added for reference: currently uses "w" value as brightness value.. and ignores rgb 
 static const char ALL_RGBW[] =                       {"basement/hallway/all/rgbw"};               // subsribe // home bridge
 static const char STATUS_ALL_RGBW[] =                {"status/basement/hallway/all/rgbw"};        // publish // homebridge
