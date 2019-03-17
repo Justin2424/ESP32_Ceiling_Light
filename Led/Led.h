@@ -10,7 +10,7 @@
 #define Led_h
 
 constexpr uint8_t MAX_LED_COUNT = 16;     // used to declare an array of Led //
-constexpr uint8_t _UPDATE_SPEED = 5 ;     // ms per loop.. lower will speed loop up
+constexpr uint8_t _UPDATE_SPEED = 3 ;     // ms per loop.. lower will speed loop up
 constexpr uint16_t FREQ = 8000;           // PWM config: approx 400-15000
 constexpr uint16_t RESOLUTION = 8;        // 8 bit resolution, is 0-255 values
 constexpr uint16_t MAX_BRIGHTNESS = 100;  // pow(RESOLUTION,2)-1;  
@@ -36,7 +36,7 @@ class Led{
     
     static void alarm(void);
     static void notify(void);
-    static void blink(void);
+    static void scene(void);
     static void tracking(void);
 
     static void loop(void);			
@@ -64,7 +64,7 @@ class Led{
     int _endFadeValue;
 	  static uint32_t _alarmCounter;
 	  static uint32_t _notifyCounter;
-	  static uint32_t _blinkCounter;
+	  static uint32_t _sceneCounter;
 	  static uint32_t _trackingCounter;
 
     static uint32_t _last_update_time;  
