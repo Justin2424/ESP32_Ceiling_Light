@@ -60,44 +60,50 @@ Led led7(4, 7, (char*)"basement/hallway/row7/on",                   // subscribe
                 (char*)"status/basement/hallway/row7/on",           // publish "on" status
                 (char*)"basement/hallway/row7/brightness",          // subsribe to "brightness" topic
                 (char*)"status/basement/hallway/row7/brightness");  // publish "brightness" status
+
 /*
-Led led8(15, 0, (char*)"basement/hallway/row8/on",                  // subscribe to "on" topic
+Led led8(15, 7, (char*)"basement/hallway/row8/on",                  // subscribe to "on" topic
                 (char*)"status/basement/hallway/row8/on",           // publish "on" status
                 (char*)"basement/hallway/row8/brightness",          // subsribe to "brightness" topic
                 (char*)"status/basement/hallway/row8/brightness");  // publish "brightness" status           
 */
-// all leds group topics.      // The portion of text "basement/hallway/all" can be edited to your prefered naming needs
-static const char ALL_ON[] =                         {"basement/hallway/all/on"};                 // subsribe // home bridge
-static const char STATUS_ALL_ON[] =                  {"status/basement/hallway/all/on"};          // publish // homebridge
 
-static const char ALL_BRIGHTNESS[] =                 {"basement/hallway/all/brightness"};         // subsribe // new
-static const char STATUS_ALL_BRIGHTNESS[] =          {"status/basement/hallway/all/brightness"};  // publish // new
+// all leds:  MQTT topics.      // The portion of text "basement/hallway/all" can be edited to your prefered naming needs
+// these MQTT Topics we will used to control all leds as a group: 
+static const char ALL_ON[] =                         {"basement/hallway/all/on"};                 // subsribe to recieve
+static const char STATUS_ALL_ON[] =                  {"status/basement/hallway/all/on"};          // publish to update other apps/clients
+
+static const char ALL_BRIGHTNESS[] =                 {"basement/hallway/all/brightness"};         // subsribe 
+static const char STATUS_ALL_BRIGHTNESS[] =          {"status/basement/hallway/all/brightness"};  // publish
 // gBridge requires its own mqtt format if your using its cloud server.   
 // CHANGE the #'s 1234567 (user_id and device id).. according to what is shown for your device in your gbridge account
-static const char gBridge_ALL_ON[] =                 {"gBridge/u123/d4567/onoff"};                // CHANGE the #'s (1234567)  // subsribe 
-static const char gBridge_STATUS_ALL_ON[] =          {"gBridge/u123/d4567/onoff/set"};            // CHANGE the #'s (1234567)  // publish status 
+static const char gBridge_ALL_ON[] =                 {"gBridge/u123/d4567/onoff"};                // subsribe 
+static const char gBridge_STATUS_ALL_ON[] =          {"gBridge/u123/d4567/onoff/set"};            // publish 
 
 static const char gBridge_ALL_BRIGHTNESS[] =         {"gBridge/u123/d4567/brightness"};           // subsribe
 static const char gBridge_STATUS_ALL_BRIGHTNESS[] =  {"gBridge/u123/d4567/brightness/set"};       // publish
-// RGBW Added for reference: currently uses "w" value as brightness value.. and ignores rgb 
-static const char ALL_RGBW[] =                       {"basement/hallway/all/rgbw"};               // subsribe // home bridge
-static const char STATUS_ALL_RGBW[] =                {"status/basement/hallway/all/rgbw"};        // publish // homebridge
 
-// topics used by scenes / extra functionality
+// topics for scenes or extra functionality
 static const char NOTIFY[] =                         {"basement/hallway/notify"};                 // subsribe 
 static const char STATUS_NOTIFY[] =                  {"status/basement/hallway/notify"};          // publish 
 
 static const char ALARM[] =                         {"basement/hallway/alarm"};                   // subsribe 
 static const char STATUS_ALARM[] =                  {"status/basement/hallway/alarm"};            // publish 
 
-static const char BLINK[] =                         {"basement/hallway/blink"};                   // subsribe 
-static const char STATUS_BLINK[] =                  {"status/basement/hallway/blink"};            // publish 
+static const char SCENE[] =                         {"basement/hallway/scene"};                   // subsribe 
+static const char STATUS_SCENE[] =                  {"status/basement/hallway/scene"};            // publish 
 
 static const char TRACK[] =                         {"basement/hallway/track"};                   // subsribe 
 static const char STATUS_TRACK[] =                  {"status/basement/hallway/track"};            // publish 
 
 // MQTT CheckIn topic. - We'll publish to this topic regularly so other devices/we know this mcu is up and running
 static const char CHECK_IN[] =                      {"checkin/basement/hallwaymcu"};              // publish  
+
+// RGBW Added for future use: currently uses "w" value as brightness value.. and ignores rgb..  
+static const char ALL_RGBW[] =                       {"basement/hallway/all/rgbw"};               // subsribe // home bridge
+static const char STATUS_ALL_RGBW[] =                {"status/basement/hallway/all/rgbw"};        // publish // homebridge
+
+
 // End of MQTT Config //
 
 /**********************************************************************************************************************************/
@@ -110,17 +116,20 @@ bool isBoolean = true;                                            // keps compat
 
 unsigned long waitCount = 0;                                      // Wifi is trying to connect counter
 uint8_t conn_stat = 0;                                            // Connection status for WiFi and MQTT:
-                                                                  // status |   WiFi   |    MQTT
-                                                                  // -------+----------+------------
-                                                                  //      0 |   down   |    down
-                                                                  //      1 | starting |    down
-                                                                  //      2 |    up    |    down
-                                                                  //      3 |    up    |  starting
-                                                                  //      4 |    up    | finalising
-                                                                  //      5 |    up    |     up
+                                                                  // status |   WiFi   |    MQTT    |   Led (built in)
+                                                                  // -------+----------+------------------------
+                                                                  //      0 |   down   |    down    |   blink 
+                                                                  //      1 | starting |    down    |   "
+                                                                  //      2 |    up    |    down    |   fast blink
+                                                                  //      3 |    up    |  starting  |   ""
+                                                                  //      4 |    up    | finalising |   ""
+                                                                  //      5 |    up    |     up     |   dim
+
+bool built_in_led_state = LOW;                                    // built led shows to indicate wifi state
+unsigned long last_led_millis = millis();                         // last time led state was updated
 
 unsigned long lastStatus = 0;                                     // time of last published checkin. code where conn_stat == 5.
-unsigned long lastTask = 0;                                       // time of last loop.              code where conn_stat <> 5
+unsigned long lastTask = 0;                                       // time of last loop.              
 
 WiFiClient espClient;
 PubSubClient mqttClient(espClient);
@@ -140,7 +149,7 @@ Switch switchThree(action_B, 33, INPUT);                          // change acti
 
 // ACTION_A : default action that executes when a switch is toggled
 void action_A(bool switchOn){
-  Serial.println(F("Switch toggled: doing action_A... Toggle all Leds."));
+  Serial.println(F("Switch toggled: doing action_A... toggle all Leds."));
   bool somethingIsOn = false;                                            // true if any one of the leds was toggled on
   for(size_t i = 0; i < Led::instanceCount; i++ ){                       // loop for led list
     bool newOnState = Led::instances[i]->toggle();                       // toggle led, and get the new onoff state that is returned
@@ -150,8 +159,8 @@ void action_A(bool switchOn){
     if(somethingIsOn) mqttClient.publish(STATUS_ALL_ON,"true");          // puiblish new state, so other devices/apps can update
     else mqttClient.publish(STATUS_ALL_ON,"false");                      // puiblish new state, so other devices/apps can update
   }
-  if(somethingIsOn) { Serial.print(STATUS_ALL_ON); Serial.println (" = toggled = on"); } // print 
-  else { Serial.print(STATUS_ALL_ON); Serial.println (" = toggled = off"); }          // print  
+  if(somethingIsOn) { Serial.print(STATUS_ALL_ON); Serial.println (" = on"); }  // print 
+  else { Serial.print(STATUS_ALL_ON); Serial.println (" = off"); }              // print  
   
 }
 
@@ -199,19 +208,19 @@ void callback(char *topic, byte *bMessage, unsigned int length){
   sMessage.toCharArray(cMessage, length+1);
   Serial.println(sMessage);  
   
-  // for 'All' Leds in a group topics :
-  // onoff topic
-  if (newTopic == ALL_ON || newTopic == gBridge_ALL_ON ){
-    // on
+  // 'All' Leds (group) topics :
+  
+  if (newTopic == ALL_ON || newTopic == gBridge_ALL_ON ){                             // onoff topic
+    // All Leds: on
     if(sMessage == "true" || sMessage == "on" || (sMessage == "1" && isBoolean)){
       for(int i=0; i < Led::instanceCount; i++) {
         Led::instances[i]->on(); 
       }
-      mqttClient.publish(STATUS_ALL_ON, "true");                                         // show other devices your new status
+      mqttClient.publish(STATUS_ALL_ON, "true");                                      // show other devices your new status
       mqttClient.publish(gBridge_STATUS_ALL_ON, "true");                              // show other devices your new status
       Serial.print(STATUS_ALL_ON); Serial.println (" = true");
     }
-    // off 
+    // All Leds: off 
     else if(sMessage == "false" || sMessage == "0" || sMessage == "off"){  
       for(int i=0; i < Led::instanceCount; i++) {
         Led::instances[i]->off(); 
@@ -220,7 +229,8 @@ void callback(char *topic, byte *bMessage, unsigned int length){
       mqttClient.publish(gBridge_STATUS_ALL_ON, "false");                             // show other devices your new status
       Serial.print(STATUS_ALL_ON); Serial.println (" = false");
     }
-    else if (sMessage == "toggle" ){                                                  // nice for testing
+    // All Leds:  toggle
+    else if (sMessage == "toggle" ){                                         // nice for testing
       bool somethingIsOn = false;                                            // true if any one of the leds was toggled on
       for(size_t i = 0; i < Led::instanceCount; i++ ){                       // loop for led list
         bool newOnState = Led::instances[i]->toggle();                       // toggle led, and get the new onoff state that is returned
@@ -228,26 +238,34 @@ void callback(char *topic, byte *bMessage, unsigned int length){
       }
       if(somethingIsOn) {
         mqttClient.publish(STATUS_ALL_ON,"true");   
-        mqttClient.publish(gBridge_STATUS_ALL_ON, "true");                             // puiblish new state, so other devices/apps can update
+        mqttClient.publish(gBridge_STATUS_ALL_ON, "true");                   // puiblish new state, so other devices/apps can update
         Serial.print(STATUS_ALL_ON); Serial.println (" = true");
       }
       else {
         mqttClient.publish(STATUS_ALL_ON,"false"); 
-        mqttClient.publish(gBridge_STATUS_ALL_ON, "false");                                     // puiblish new state, so other devices/apps can update
-        Serial.print(STATUS_ALL_ON); Serial.println (" = false");           // print   
+        mqttClient.publish(gBridge_STATUS_ALL_ON, "false");                  // puiblish new state, so other devices/apps can update
+        Serial.print(STATUS_ALL_ON); Serial.println (" = false");            // print   
       }
     }
+    // All Leds:  brightness and turn on/off
     else if (sMessage == "0" || (intMessage >= 1 && intMessage <= 100) ){    // avoiding intMessage=0, which could be an unidentified message too 
-      for(int i=0; i < Led::instanceCount; i++) {   
-            Led::instances[i]->setBrightness(intMessage);
-            mqttClient.publish(Led::instances[i]->pub_Brightness, cMessage);
-            Serial.print(Led::instances[i]->pub_Brightness); Serial.print (" = "); Serial.println(sMessage);
-      }
+      isBoolean = false; // we are using brightness values in this topic... use '1' as a brightness... disable it's use as boolean 'on/true'
+      callback((char*)ALL_BRIGHTNESS, bMessage, length);                     // brightness
+      for(int i=0; i < Led::instanceCount; i++) {                            // loop for every led
+        if(!Led::instances[i]->isOn()){                                      // if not on
+          Led::instances[i]->on();                                           // turn on
+          mqttClient.publish(STATUS_ALL_ON, "true");                         // show other devices your new status
+          mqttClient.publish(gBridge_STATUS_ALL_ON, "true");                 // show other devices your new status
+          Serial.print(STATUS_ALL_ON); Serial.println (" = true");           // print
+        }
+        
+      } 
+     
     }
   }
-  // All Leds:
-  // brightness
-  else if (newTopic == ALL_BRIGHTNESS || newTopic == gBridge_ALL_BRIGHTNESS ){  
+  
+  // All Leds: brightness
+  else if (newTopic == ALL_BRIGHTNESS || newTopic == gBridge_ALL_BRIGHTNESS ){              // brightness topic
     if (sMessage == "0" || (intMessage >= 1 && intMessage <= 100) ){    // avoiding intMessage=0, which could be an unidentified message too 
         for(int i=0; i < Led::instanceCount; i++) {
           Led::instances[i]->setBrightness(intMessage);
@@ -255,39 +273,37 @@ void callback(char *topic, byte *bMessage, unsigned int length){
         mqttClient.publish(STATUS_ALL_BRIGHTNESS, cMessage);
         mqttClient.publish(gBridge_STATUS_ALL_BRIGHTNESS, cMessage);  
         Serial.print(STATUS_ALL_BRIGHTNESS); Serial.print (" = "); Serial.println (sMessage);
-    }
-    
-    
+    }  
   }
-
+  
   //This will recognise rgbw brightness values like this: "0,0,0,255"
-  //RGB is not supported in hardware.
+  //RGB is not supported in hardware. TODO: ADD LED STRIP SUPPORT
   else if (newTopic == ALL_RGBW){                             
     //Serial.println();
     //Serial.print("captured String is : "); 
     //Serial.println(sMessage);                                   // prints string to serial port out... 
     
-    int ind1 = sMessage.indexOf(',');                           // finds location of first ,
+    int ind1 = sMessage.indexOf(',');                                  // finds location of first ,
     int r = round(sMessage.substring(0, ind1).toInt());                // captures first data String
-    int ind2 = sMessage.indexOf(',', ind1+1 );                  // finds location of second ,
+    int ind2 = sMessage.indexOf(',', ind1+1 );                         // finds location of second ,
     int g = round(sMessage.substring(ind1+1, ind2+1).toInt());         // captures second data String
     int ind3 = sMessage.indexOf(',', ind2+1 );
     int b = round(sMessage.substring(ind2+1, ind3+1).toInt());
     //int ind4 = sMessage.indexOf(',', ind3+1 );
     int brightness = round(sMessage.substring(ind3+1).toInt() / 2.55); // captures remain part of data after last ,
     /* // print r g b brightness values
-    Serial.print("r = "); Serial.println(r); 
-    Serial.print("g = "); Serial.println(g);
-    Serial.print("b = "); Serial.println(b);
-    Serial.print("brightness = "); Serial.println(brightness);
-    Serial.println(); Serial.println();
+    // Serial.print("r = "); Serial.println(r); 
+    // Serial.print("g = "); Serial.println(g);
+    // Serial.print("b = "); Serial.println(b);
+    // Serial.print("brightness = "); Serial.println(brightness);
+    // Serial.println(); Serial.println();
     */
     for(int i=0; i < Led::instanceCount; i++) 
-        Led::instances[i]->setBrightness(brightness);  // We can use the w as brightness for now
+        Led::instances[i]->setBrightness(brightness);                   // We can use the w as brightness for now
 
     char str[40];  
     int w =   round(brightness*2.55);                            
-    sprintf(str,"%d,%d,%d,%d",r,g,b,w);                        // using sprintf to convert to char[]
+    sprintf(str,"%d,%d,%d,%d",r,g,b,w);                                 // using sprintf to convert to char[]
     
     mqttClient.publish(STATUS_ALL_RGBW, str);
    // mqttClient.publish(publishStatusTopicBrightness, (char*) brightness);
@@ -308,11 +324,11 @@ void callback(char *topic, byte *bMessage, unsigned int length){
     mqttClient.publish(STATUS_ALARM, cMessage);
     Serial.print(STATUS_ALARM); Serial.print (" = "); Serial.println (sMessage);
   }                     
-  // blink Message
-  else if (newTopic == BLINK) {
-    Led::blink();
-    mqttClient.publish(STATUS_BLINK, cMessage);
-    Serial.print(STATUS_BLINK); Serial.print (" = "); Serial.println (sMessage);
+  // scene Message
+  else if (newTopic == SCENE) {
+    Led::scene();
+    mqttClient.publish(STATUS_SCENE, cMessage);
+    Serial.print(STATUS_SCENE); Serial.print (" = "); Serial.println (sMessage);
   }                          
   // tracking Message
   else if (newTopic == TRACK) {
@@ -320,25 +336,25 @@ void callback(char *topic, byte *bMessage, unsigned int length){
     mqttClient.publish(STATUS_TRACK, cMessage);
     Serial.print(STATUS_TRACK); Serial.print (" = "); Serial.println (sMessage);
   }                     
-  // restart Message
+  // restart Message            // reboot... not sure if this can ever be handy
   else if (newTopic == "basement/hallway/restart") {
-    ESP.restart();  // reboot... not sure if this can ever be handy
+    ESP.restart();  
   }
   //
   
-  else{ // Individual Leds: 
+  else{ // Individual Led Topics: 
     for(int i=0; i < Led::instanceCount; i++) {
       if (newTopic == Led::instances[i]->sub_On ){
-        // on
+        // Led: on
         if(sMessage == "true" || sMessage == "on" || (sMessage == "1" && isBoolean)){
           Led::instances[i]->on(); 
-          mqttClient.publish(Led::instances[i]->pub_On, "true");                                         // show other devices your new status
+          mqttClient.publish(Led::instances[i]->pub_On, "true");                          // show other devices your new status
           Serial.print(Led::instances[i]->pub_On); Serial.println (" = true");
         }
-        // off 
+        // Led: off 
         else if(sMessage == "false" || sMessage == "0" || sMessage == "off"){  
           Led::instances[i]->off(); 
-          mqttClient.publish(Led::instances[i]->pub_On, "false");                                     // show other devices your new status
+          mqttClient.publish(Led::instances[i]->pub_On, "false");                         // show other devices your new status
           Serial.print(Led::instances[i]->pub_On); Serial.println (" = false");
         }
         else if (sMessage == "toggle" ){                                                  // nice for testing
@@ -352,16 +368,20 @@ void callback(char *topic, byte *bMessage, unsigned int length){
             Serial.print(Led::instances[i]->pub_On); Serial.println (" = flase");
           }
         }
-         // brightness 
-        else if (sMessage == "0" || (intMessage >= 1 && intMessage <= 100) ){    // avoiding intMessage=0, which could be an unidentified message too 
-            Led::instances[i]->setBrightness(intMessage);
-            mqttClient.publish(Led::instances[i]->pub_Brightness, cMessage);
-            Serial.print(Led::instances[i]->pub_Brightness); Serial.print (" = "); Serial.println(sMessage);
+         // Led: brightness and on
+        else if (sMessage == "0" || (intMessage >= 1 && intMessage <= 100) ){  // avoiding intMessage=0, which could be an unidentified message too 
+          isBoolean = false; // we are using brightness values in this topic... use '1' as a brightness... disable it's use as boolean 'on/true'
+          callback((char*)ALL_BRIGHTNESS, bMessage, length);                   // brightness
+          if(!Led::instances[i]->isOn()){                                      // if not on
+            Led::instances[i]->on();                                           // turn on
+            mqttClient.publish(STATUS_ALL_ON, "true");                         // show other devices your new status
+            mqttClient.publish(gBridge_STATUS_ALL_ON, "true");                 // show other devices your new status
+            Serial.print(STATUS_ALL_ON); Serial.println (" = true");           // print
+          }
+       
         }
-
-
       }
-      // brightness
+      // Led: brightness
       else if (newTopic == Led::instances[i]->sub_Brightness ){  
         if (sMessage == "0" || (intMessage >= 1 && intMessage <= 100) ){    // avoiding intMessage=0, which could be an unidentified message too 
             Led::instances[i]->setBrightness(intMessage);
@@ -393,7 +413,10 @@ void setup(void) {
   ArduinoOTA.begin();                                             //       at this point OTA is set up
   Serial.print("OTA is configured... ");
   Serial.print("Host name = " ); Serial.println( mqtt_client_name);
-  delay(100);
+  delay(5);
+
+  // Init status Led built in to esp32
+  pinMode(BUILTIN_LED, OUTPUT);
 }
 
 /********************************************************************************************************************************/
@@ -407,8 +430,9 @@ void loop() {
   switch (conn_stat) {
     case 0:                                                       // MQTT and WiFi down: start WiFi
       Serial.println("MQTT and WiFi down: start WiFi");  
+      //WiFi.disconnect();  
       WiFi.begin(ssid, password);
-      //delay(100);                                                  
+      //delay(1);                                                  
       conn_stat = 1;
       break;
     case 1:                                                       // WiFi starting, 
@@ -470,8 +494,8 @@ void loop() {
       mqttClient.subscribe(ALARM);
       Serial.print("subscribed to: "); Serial.println(ALARM);
       delay(20);
-      mqttClient.subscribe(BLINK);
-      Serial.print("subscribed to: "); Serial.println(BLINK);
+      mqttClient.subscribe(SCENE);
+      Serial.print("subscribed to: "); Serial.println(SCENE);
       delay(20);
       mqttClient.subscribe(TRACK);
       Serial.print("subscribed to: "); Serial.println(TRACK);
@@ -498,6 +522,13 @@ void loop() {
 
 // start section for tasks which should run regardless of WiFi/MQTT
 
+  // show connection staus using builtin led on esp32
+  if ( millis() - last_led_millis > 505 - (100*conn_stat)){
+    last_led_millis = millis();
+    built_in_led_state = !built_in_led_state;
+    digitalWrite(LED_BUILTIN, built_in_led_state);
+  }
+
   Switch::loop();
   Led::loop();
   // ..add any code you want in the loop() here.. (don't use delay)
@@ -506,6 +537,7 @@ void loop() {
   
 // end of section for tasks which should run regardless of WiFi/MQTT
 }
+
 
 
 
