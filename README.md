@@ -24,18 +24,17 @@ Features:
  
   Note : I have not tested the power handling limit of the board / components.. do so at own risk.
   
-  please let me know if you find any bugs, or have suggestions. Contributions to the code would be more than welcomed..
- Its a project in progress.. I'm interested in adding as many sensors and features as practical into this, or supporting boards.
-  including:
+  please let me know if you find any bugs, have suggestions, and or questions. Contributions to the code are more than welcomed..
+  I'll be adding sensors and other features to this board.
+  
+    - temp and humidity sensor support.
     - Addressable led control via i2c
-    - full connection manager (ap for phone browser config / connection).
-    - Various sensors like temp and humidity sensors/support.
-    - Presence detection (who's phone is online)
-    and hopefully:
-    - Motion detection/tracking (ir array with logic/analsys).
-    and perhaps 
-      -a simple mesh network/peer to peer/relay mqtt messages, for clients who are out of the wifi range/ disconnected from the broker 
+    - relay switching for wall plugs 
      
+ eventually:
+    - Motion detection/tracking (ir array with logic/analsys).
+ maybe: - full connection manager (for phone browser config).
+    
   
   
   justinmallais@gmail.com
