@@ -9,20 +9,20 @@
 #include <ArduinoOTA.h>
 #include <Led.h>
 #include <Switch.h>
-#include <TempSensorDHT11.h>                                                 
-#include <LedStrip.h>   
+//#include <TempSensorDHT11.h>                                                 
+//#include <LedStrip.h>   
 
 // CHANGE: gpio pin, and "basement/hallway" portion of topic, if desired to suit your needs                            
 // Format:(gpio pin, "mqqt publish tempature topic", "mqqt publish humidity topic", "mqqt publish heat_index topic" )
-TempSensorDHT11 tempSensorDHT11(9, (char*)"basement/hallway/tempature", (char*)"basement/hallway/humidity", (char*)"basement/hallway/heatindex");
+//TempSensorDHT11 tempSensorDHT11(9, (char*)"basement/hallway/tempature", (char*)"basement/hallway/humidity", (char*)"basement/hallway/heatindex");
 
 /**********************************************************************************************************************************/
 /******* USER CONFIGURED SECTION **************************************************************************************************/
 
 
-static const char* ssid = "aWiFiNetwork";                         // change... use your wifi network name
-static const char* password = "classified";                       // change... use your wifi password
-static const char* mqtt_server = "192.168.0.25";                  // change... ip address  
+static const char* ssid = "";                                     // change... use your wifi network name
+static const char* password = "";                                 // change... use your wifi password
+static const char* mqtt_server = "";                              // change... ip address  
 static const int mqtt_port = 1883;                                // change... if required
 static const char *mqtt_user = "";                                // change... if required
 static const char *mqtt_pass = "";                                // change... if required
@@ -87,11 +87,11 @@ static const char ALL_BRIGHTNESS[] =                 {"basement/hallway/all/brig
 static const char STATUS_ALL_BRIGHTNESS[] =          {"status/basement/hallway/all/brightness"};  // publish
 // gBridge requires its own mqtt format if your using its cloud server.   
 // CHANGE the #'s 1234567 (user_id and device id).. according to what is shown for your device in your gbridge account
-static const char gBridge_ALL_ON[] =                 {"gBridge/u814/d2241/onoff"};                // subsribe 
-static const char gBridge_STATUS_ALL_ON[] =          {"gBridge/u814/d2241/onoff/set"};            // publish 
+static const char gBridge_ALL_ON[] =                 {"gBridge/u123/d4567/onoff"};                // subsribe 
+static const char gBridge_STATUS_ALL_ON[] =          {"gBridge/u123/d4567/onoff/set"};            // publish 
 
-static const char gBridge_ALL_BRIGHTNESS[] =         {"gBridge/u814/d2241/brightness"};           // subsribe
-static const char gBridge_STATUS_ALL_BRIGHTNESS[] =  {"gBridge/u814/d2241/brightness/set"};       // publish
+static const char gBridge_ALL_BRIGHTNESS[] =         {"gBridge/u123/d4567/brightness"};           // subsribe
+static const char gBridge_STATUS_ALL_BRIGHTNESS[] =  {"gBridge/u123/d4567/brightness/set"};       // publish
 
 // topics for scenes or extra functionality
 static const char NOTIFY[] =                         {"basement/hallway/notify"};                 // subsribe 
@@ -455,7 +455,7 @@ void setup(void) {
 
   // Optional hardware support:
   // DHT11 temp and humidity sensor
-  tempSensorDHT11.setup();
+  // tempSensorDHT11.setup();
 
   
 }
@@ -565,7 +565,7 @@ void loop() {
 
   Switch::loop();
   Led::loop();
-  LedStrip::loop();
+  // LedStrip::loop();
   // ..add any code you want in the loop() here.. (don't use delay)
 
 
@@ -582,7 +582,7 @@ void loop() {
     }
     ArduinoOTA.handle();                                            // internal household function for OTA
     
-    tempSensorDHT11.loop(mqttClient);                               // optional hardware support
+    //tempSensorDHT11.loop(mqttClient);                               // optional hardware support
     mqttClient.loop();                                              // internal household function for MQTT
     
     // ...add any code you want in the loop that requires wifi here..
